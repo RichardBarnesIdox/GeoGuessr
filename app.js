@@ -4,19 +4,19 @@
       name: "Edinburgh Old Town",
       lat: 55.9497,
       lng: -3.1904,
-      osGridRef: "NT 257 736"
+      osGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
       name: "Snowdonia National Park",
       lat: 53.0685,
       lng: -4.0761,
-      osGridRef: "SH 609 543"
+      sGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
       name: "Brighton Seafront",
       lat: 50.8195,
       lng: -0.1364,
-      osGridRef: "TQ 311 042"
+      sGridRef: "Where is this?  Click on map to place your guess!"
     }
   ];
 
