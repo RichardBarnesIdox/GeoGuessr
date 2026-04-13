@@ -1,3 +1,3 @@
 window.APP_CONFIG = {
-  googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY"
+  googleMapsApiKey: "AIzaSyA-VHE4SKUuNjFHx32ysShDqutrK7GZNDg"
 };
