@@ -1,21 +1,21 @@
 (function () {
   const rounds = [
     {
-      name: "Edinburgh Old Town",
-      lat: 55.9497,
-      lng: -3.1904,
+      name: "Idox Farnborough",
+      lat: 51.2863,
+      lng: -0.7601,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
-      name: "Snowdonia National Park",
-      lat: 53.0685,
-      lng: -4.0761,
+      name: "Idox Talgarth",
+      lat: 51.9961,
+      lng: 3.2325,
       sGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
-      name: "Brighton Seafront",
-      lat: 50.8195,
-      lng: -0.1364,
+      name: "Idox Glasgow",
+      lat: 55.8617,
+      lng: 4.2485,
       sGridRef: "Where is this?  Click on map to place your guess!"
     }
   ];
@@ -163,7 +163,7 @@
     const round = rounds[roundIndex];
     elements.roundTitle.textContent = `Round ${roundIndex + 1} of ${rounds.length}`;
     elements.roundSubtitle.textContent = round.osGridRef
-      ? `OS Grid Ref: ${round.osGridRef}`
+      ? round.osGridRef
       : "No grid reference provided";
 
     loadStreetView(round);
