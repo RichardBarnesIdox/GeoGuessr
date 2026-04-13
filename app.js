@@ -47,8 +47,6 @@
     roundSubtitle: document.getElementById("round-subtitle"),
     runningScore: document.getElementById("running-score"),
     roundResult: document.getElementById("round-result"),
-    resultGuess: document.getElementById("result-guess"),
-    resultActual: document.getElementById("result-actual"),
     resultDistance: document.getElementById("result-distance"),
     resultScore: document.getElementById("result-score"),
     finalScore: document.getElementById("final-score"),
@@ -69,10 +67,6 @@
       element.classList.toggle("view-active", isActive);
       element.setAttribute("aria-hidden", String(!isActive));
     });
-  }
-
-  function formatCoordinates(lat, lng) {
-    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
 
   function haversineDistanceKm(a, b) {
@@ -100,8 +94,8 @@
 
   function initMap() {
     state.map = L.map("guess-map", {
-      center: [54.5, -3.5],
-      zoom: 5,
+      center: [51.3, -1.2],
+      zoom: 7,
       minZoom: 4
     });
 
@@ -159,7 +153,7 @@
   }
 
   function resetMapView() {
-    state.map.setView([54.5, -3.5], 5);
+    state.map.setView([51.3, -1.2], 7);
   }
 
   function loadRound(roundIndex) {
@@ -272,8 +266,6 @@
   }
 
   function renderRoundResult(result) {
-    elements.resultGuess.textContent = `Guessed coordinates: ${formatCoordinates(result.guessed.lat, result.guessed.lng)}`;
-    elements.resultActual.textContent = `Actual coordinates: ${formatCoordinates(result.actual.lat, result.actual.lng)}`;
     elements.resultDistance.textContent = `Distance: ${result.distanceKm.toFixed(1)} km`;
     elements.resultScore.textContent = `Round score: ${result.score}`;
     elements.roundResult.classList.remove("hidden");

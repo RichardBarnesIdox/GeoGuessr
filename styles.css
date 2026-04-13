@@ -104,10 +104,26 @@ body {
   min-height: 500px;
 }
 
+.street-view-panel {
+  background: #000;
+  isolation: isolate;
+}
+
+.panel-heading {
+  padding: 14px 16px 0;
+  font-weight: 600;
+}
+
 .street-view-canvas,
 .map-canvas {
   width: 100%;
   min-height: 500px;
+}
+
+.street-view-canvas {
+  background: #000;
+  filter: none;
+  mix-blend-mode: normal;
 }
 
 .map-actions {
