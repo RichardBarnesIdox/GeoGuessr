@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini GeoGuessr UK</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  >
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section id="home-view" class="view view-active">
+      <div class="home-card">
+        <h1>Mini GeoGuessr UK</h1>
+        <p>Guess three UK Street View locations by clicking on the map and score points based on how close you get.</p>
+        <button id="start-game-button" class="primary-button">Start Game</button>
+      </div>
+    </section>
+
+    <section id="game-view" class="view" aria-hidden="true">
+      <header class="top-bar">
+        <div>
+          <h2 id="round-title">Round 1</h2>
+          <p id="round-subtitle" class="muted-text"></p>
+        </div>
+        <div class="score-chip">
+          Total Score:
+          <strong id="running-score">0</strong>
+        </div>
+      </header>
+
+      <div class="game-layout">
+        <section class="panel street-view-panel">
+          <div id="street-view" class="street-view-canvas"></div>
+          <div id="street-view-fallback" class="fallback-message hidden">
+            Street View is unavailable for this round. You can still place a guess on the map.
+          </div>
+        </section>
+
+        <section class="panel map-panel">
+          <div id="guess-map" class="map-canvas"></div>
+          <div class="map-actions">
+            <button id="confirm-guess-button" class="primary-button hidden">Confirm Guess</button>
+          </div>
+        </section>
+      </div>
+
+      <section id="round-result" class="result-card hidden" aria-live="polite">
+        <h3>Round Result</h3>
+        <p id="result-guess"></p>
+        <p id="result-actual"></p>
+        <p id="result-distance"></p>
+        <p id="result-score"></p>
+        <button id="next-round-button" class="primary-button hidden">Next Round</button>
+        <button id="final-results-button" class="primary-button hidden">View Final Results</button>
+      </section>
+    </section>
+
+    <section id="end-view" class="view" aria-hidden="true">
+      <div class="end-card">
+        <h2>Game Complete</h2>
+        <p class="final-score">Total Score: <strong id="final-score">0</strong></p>
+        <div id="breakdown-list" class="breakdown-list"></div>
+        <button id="play-again-button" class="primary-button">Play Again</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="./config.js"></script>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="./app.js"></script>
+</body>
+</html>
