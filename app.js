@@ -94,7 +94,7 @@
 
   function initMap() {
     state.map = L.map("guess-map", {
-      center: [51.3, -1.2],
+      center: [52.4862, -1.8904],
       zoom: 8,
       minZoom: 4
     });
@@ -153,7 +153,7 @@
   }
 
   function resetMapView() {
-    state.map.setView([51.3, -1.2], 8);
+    state.map.setView([52.4862, -1.8904], 8);
   }
 
   function loadRound(roundIndex) {
