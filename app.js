@@ -8,14 +8,14 @@
     },
     {
       name: "Idox Talgarth",
-      lat: 51.9961,
-      lng: 3.2325,
+      lat: 51.99687,
+      lng: -3.23325,
       sGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
       name: "Idox Glasgow",
-      lat: 55.8617,
-      lng: 4.2485,
+      lat: 55.86066,
+      lng: -4.25759,
       sGridRef: "Where is this?  Click on map to place your guess!"
     }
   ];
