@@ -1,4 +1,7 @@
 (function () {
+  const LEADERBOARD_LIMIT = 5;
+  const LEADERBOARD_PATH = "leaderboard";
+  const LEADERBOARD_RETRY_LIMIT = 3;
   const rounds = [
     {
       name: "Idox Farnborough",
@@ -24,12 +27,15 @@
     currentRoundIndex: 0,
     totalScore: 0,
     results: [],
+    leaderboard: [],
     guessLatLng: null,
     map: null,
     guessMarker: null,
     actualMarker: null,
     resultLine: null,
-    panorama: null
+    panorama: null,
+    pendingLeaderboardScore: null,
+    submittingLeaderboard: false
   };
 
   let googleMapsLoadPromise = null;
@@ -52,8 +58,300 @@
     finalScore: document.getElementById("final-score"),
     breakdownList: document.getElementById("breakdown-list"),
     streetViewCanvas: document.getElementById("street-view"),
-    streetViewFallback: document.getElementById("street-view-fallback")
+    streetViewFallback: document.getElementById("street-view-fallback"),
+    leaderboardList: document.getElementById("leaderboard-list"),
+    resetLeaderboardButton: document.getElementById("reset-leaderboard-button"),
+    leaderboardModal: document.getElementById("leaderboard-modal"),
+    leaderboardForm: document.getElementById("leaderboard-form"),
+    leaderboardName: document.getElementById("leaderboard-name"),
+    leaderboardCompany: document.getElementById("leaderboard-company"),
+    leaderboardFormMessage: document.getElementById("leaderboard-form-message"),
+    leaderboardOptOutButton: document.getElementById("leaderboard-opt-out-button")
   };
+
+  function getLeaderboardDatabaseUrl() {
+    const config = window.APP_CONFIG || {};
+    return typeof config.leaderboardDatabaseUrl === "string"
+      ? config.leaderboardDatabaseUrl.replace(/\/+$/, "")
+      : "";
+  }
+
+  function hasSharedLeaderboard() {
+    return Boolean(getLeaderboardDatabaseUrl());
+  }
+
+  function getLeaderboardRequestUrl() {
+    return `${getLeaderboardDatabaseUrl()}/${LEADERBOARD_PATH}.json`;
+  }
+
+  function sanitizeLeaderboardEntries(entries) {
+    if (!Array.isArray(entries)) {
+      return [];
+    }
+
+    return entries
+      .filter(function (entry) {
+        return entry &&
+          typeof entry.name === "string" &&
+          typeof entry.company === "string" &&
+          Number.isFinite(entry.score);
+      })
+      .map(function (entry) {
+        return {
+          name: entry.name.trim() || "Anonymous",
+          company: entry.company.trim() || "Not provided",
+          score: Math.max(0, Math.round(entry.score)),
+          achievedAt: typeof entry.achievedAt === "number" ? entry.achievedAt : Date.now()
+        };
+      })
+      .sort(compareLeaderboardEntries)
+      .slice(0, LEADERBOARD_LIMIT);
+  }
+
+  function compareLeaderboardEntries(a, b) {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+
+    return b.achievedAt - a.achievedAt;
+  }
+
+  function renderLeaderboard() {
+    elements.leaderboardList.innerHTML = "";
+
+    if (!state.leaderboard.length) {
+      const emptyState = document.createElement("p");
+      emptyState.className = "leaderboard-empty";
+      emptyState.textContent = hasSharedLeaderboard()
+        ? "No shared scores yet. Be the first on the board."
+        : "Configure a shared leaderboard URL in config.js.";
+      elements.leaderboardList.appendChild(emptyState);
+      return;
+    }
+
+    state.leaderboard.forEach(function (entry, index) {
+      const item = document.createElement("div");
+      item.className = "leaderboard-item";
+
+      const position = document.createElement("span");
+      position.className = "leaderboard-rank";
+      position.textContent = `#${index + 1}`;
+
+      const details = document.createElement("div");
+      details.className = "leaderboard-details";
+
+      const name = document.createElement("strong");
+      name.textContent = entry.name;
+
+      const company = document.createElement("span");
+      company.className = "leaderboard-company";
+      company.textContent = entry.company;
+
+      const score = document.createElement("span");
+      score.className = "leaderboard-score";
+      score.textContent = `${entry.score} pts`;
+
+      details.appendChild(name);
+      details.appendChild(company);
+      item.appendChild(position);
+      item.appendChild(details);
+      item.appendChild(score);
+      elements.leaderboardList.appendChild(item);
+    });
+  }
+
+  function setLeaderboardFormMessage(message, isError) {
+    elements.leaderboardFormMessage.textContent = message;
+    elements.leaderboardFormMessage.classList.toggle("hidden", !message);
+    elements.leaderboardFormMessage.classList.toggle("form-message-error", Boolean(message && isError));
+  }
+
+  function setLeaderboardFormDisabled(isDisabled) {
+    state.submittingLeaderboard = isDisabled;
+    elements.leaderboardName.disabled = isDisabled;
+    elements.leaderboardCompany.disabled = isDisabled;
+    elements.leaderboardOptOutButton.disabled = isDisabled;
+
+    const submitButton = elements.leaderboardForm.querySelector('button[type="submit"]');
+    if (submitButton) {
+      submitButton.disabled = isDisabled;
+    }
+  }
+
+  async function fetchLeaderboardState() {
+    if (!hasSharedLeaderboard()) {
+      return { entries: [] };
+    }
+
+    const response = await fetch(getLeaderboardRequestUrl(), {
+      method: "GET",
+      headers: {
+        "X-Firebase-ETag": "true"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Leaderboard load failed with status ${response.status}.`);
+    }
+
+    const data = await response.json();
+    const etag = response.headers.get("ETag");
+    return {
+      etag: etag,
+      entries: sanitizeLeaderboardEntries(Array.isArray(data) ? data : [])
+    };
+  }
+
+  async function putLeaderboardEntries(entries, etag) {
+    const headers = {
+      "Content-Type": "application/json"
+    };
+
+    if (etag) {
+      headers["if-match"] = etag;
+    }
+
+    const response = await fetch(getLeaderboardRequestUrl(), {
+      method: "PUT",
+      headers: headers,
+      body: JSON.stringify(entries)
+    });
+
+    if (response.status === 412) {
+      return false;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Leaderboard save failed with status ${response.status}.`);
+    }
+
+    return true;
+  }
+
+  async function loadLeaderboard() {
+    if (!hasSharedLeaderboard()) {
+      state.leaderboard = [];
+      renderLeaderboard();
+      return;
+    }
+
+    try {
+      const leaderboardState = await fetchLeaderboardState();
+      state.leaderboard = leaderboardState.entries;
+    } catch (error) {
+      state.leaderboard = [];
+    }
+
+    renderLeaderboard();
+  }
+
+  async function updateSharedLeaderboard(mutator) {
+    if (!hasSharedLeaderboard()) {
+      throw new Error("Shared leaderboard is not configured.");
+    }
+
+    for (let attempt = 0; attempt < LEADERBOARD_RETRY_LIMIT; attempt += 1) {
+      const leaderboardState = await fetchLeaderboardState();
+      const nextEntries = sanitizeLeaderboardEntries(mutator(leaderboardState.entries));
+      const didSave = await putLeaderboardEntries(nextEntries, leaderboardState.etag);
+
+      if (didSave) {
+        state.leaderboard = nextEntries;
+        renderLeaderboard();
+        return nextEntries;
+      }
+    }
+
+    throw new Error("Shared leaderboard was updated by another player. Please try again.");
+  }
+
+  function isLeaderboardScore(score) {
+    if (!hasSharedLeaderboard()) {
+      return false;
+    }
+
+    if (state.leaderboard.length < LEADERBOARD_LIMIT) {
+      return true;
+    }
+
+    const lowestScore = state.leaderboard[state.leaderboard.length - 1].score;
+    return score >= lowestScore;
+  }
+
+  function openLeaderboardModal(score) {
+    state.pendingLeaderboardScore = score;
+    elements.leaderboardForm.reset();
+    setLeaderboardFormMessage("", false);
+    setLeaderboardFormDisabled(false);
+    elements.leaderboardModal.classList.remove("hidden");
+    elements.leaderboardName.focus();
+  }
+
+  function closeLeaderboardModal() {
+    if (state.submittingLeaderboard) {
+      return;
+    }
+
+    state.pendingLeaderboardScore = null;
+    setLeaderboardFormMessage("", false);
+    setLeaderboardFormDisabled(false);
+    elements.leaderboardModal.classList.add("hidden");
+  }
+
+  async function submitLeaderboardEntry(event) {
+    event.preventDefault();
+
+    if (state.pendingLeaderboardScore === null || state.submittingLeaderboard) {
+      return;
+    }
+
+    const name = elements.leaderboardName.value.trim();
+    const company = elements.leaderboardCompany.value.trim();
+
+    if (!name || !company) {
+      return;
+    }
+
+    setLeaderboardFormDisabled(true);
+    setLeaderboardFormMessage("Saving to shared leaderboard...", false);
+
+    try {
+      await updateSharedLeaderboard(function (entries) {
+        return entries.concat([{
+          name: name,
+          company: company,
+          score: state.pendingLeaderboardScore,
+          achievedAt: Date.now()
+        }]);
+      });
+
+      state.pendingLeaderboardScore = null;
+      setLeaderboardFormMessage("", false);
+      elements.leaderboardModal.classList.add("hidden");
+    } catch (error) {
+      setLeaderboardFormMessage(error.message, true);
+    } finally {
+      setLeaderboardFormDisabled(false);
+    }
+  }
+
+  async function resetLeaderboard() {
+    if (!hasSharedLeaderboard()) {
+      return;
+    }
+
+    elements.resetLeaderboardButton.disabled = true;
+
+    try {
+      await updateSharedLeaderboard(function () {
+        return [];
+      });
+    } catch (error) {
+      window.alert("Unable to reset the shared leaderboard right now.");
+    } finally {
+      elements.resetLeaderboardButton.disabled = false;
+    }
+  }
 
   function switchView(viewName) {
     const views = {
@@ -278,7 +576,7 @@
     }
   }
 
-  function showEndScreen() {
+  async function showEndScreen() {
     switchView("end");
     elements.finalScore.textContent = String(state.totalScore);
     elements.breakdownList.innerHTML = "";
@@ -289,6 +587,12 @@
       item.textContent = `Round ${index + 1} - ${result.roundName}: ${result.score} points, ${result.distanceKm.toFixed(1)} km away`;
       elements.breakdownList.appendChild(item);
     });
+
+    await loadLeaderboard();
+
+    if (isLeaderboardScore(state.totalScore)) {
+      openLeaderboardModal(state.totalScore);
+    }
   }
 
   function nextRound() {
@@ -362,9 +666,23 @@
     elements.finalResultsButton.addEventListener("click", function () {
       showEndScreen();
     });
+
+    elements.resetLeaderboardButton.addEventListener("click", function () {
+      resetLeaderboard();
+    });
+
+    elements.leaderboardForm.addEventListener("submit", function (event) {
+      submitLeaderboardEntry(event);
+    });
+
+    elements.leaderboardOptOutButton.addEventListener("click", function () {
+      closeLeaderboardModal();
+    });
   }
 
   function init() {
+    renderLeaderboard();
+    loadLeaderboard();
     initMap();
     attachEvents();
     loadGoogleMapsScript();

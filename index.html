@@ -14,6 +14,15 @@
 </head>
 <body>
   <main class="app-shell">
+    <aside class="leaderboard-card" aria-labelledby="leaderboard-title">
+      <h2 id="leaderboard-title">Top 5 Players</h2>
+      <div id="leaderboard-list" class="leaderboard-list"></div>
+    </aside>
+
+    <button id="reset-leaderboard-button" class="secondary-button reset-leaderboard-button" type="button">
+      Reset Leaderboard
+    </button>
+
     <section id="home-view" class="view view-active">
       <div class="home-card">
         <h1>Mini GeoGuessr UK</h1>
@@ -70,6 +79,28 @@
       </div>
     </section>
   </main>
+
+  <div id="leaderboard-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="leaderboard-modal-title">
+    <div class="modal-card">
+      <h2 id="leaderboard-modal-title">Top 5 Score!</h2>
+      <p>Your score made it onto the leaderboard. Add your details below, or opt out.</p>
+      <form id="leaderboard-form" class="leaderboard-form">
+        <label class="form-field" for="leaderboard-name">
+          Name
+          <input id="leaderboard-name" name="name" type="text" maxlength="50" required>
+        </label>
+        <label class="form-field" for="leaderboard-company">
+          Company
+          <input id="leaderboard-company" name="company" type="text" maxlength="50" required>
+        </label>
+        <p id="leaderboard-form-message" class="form-message hidden" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button id="leaderboard-opt-out-button" class="secondary-button" type="button">Opt Out</button>
+          <button class="primary-button" type="submit">Save Score</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="./config.js"></script>
   <script

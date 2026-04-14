@@ -1,3 +1,4 @@
 window.APP_CONFIG = {
-  googleMapsApiKey: "AIzaSyA-VHE4SKUuNjFHx32ysShDqutrK7GZNDg"
+  googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY",
+  leaderboardDatabaseUrl: "https://YOUR-PROJECT-ID-default-rtdb.europe-west1.firebasedatabase.app"
 };
