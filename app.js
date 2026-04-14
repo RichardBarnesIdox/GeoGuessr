@@ -77,7 +77,11 @@
   }
 
   function hasSharedLeaderboard() {
-    return Boolean(getLeaderboardDatabaseUrl());
+    const databaseUrl = getLeaderboardDatabaseUrl();
+
+    return Boolean(databaseUrl) &&
+      databaseUrl.indexOf("YOUR-PROJECT-ID") === -1 &&
+      /^https:\/\/.+/i.test(databaseUrl);
   }
 
   function getLeaderboardRequestUrl() {
@@ -191,6 +195,10 @@
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Shared leaderboard URL not found. Check leaderboardDatabaseUrl in config.js.");
+      }
+
       throw new Error(`Leaderboard load failed with status ${response.status}.`);
     }
 
@@ -222,6 +230,10 @@
     }
 
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Shared leaderboard URL not found. Check leaderboardDatabaseUrl in config.js.");
+      }
+
       throw new Error(`Leaderboard save failed with status ${response.status}.`);
     }
 
