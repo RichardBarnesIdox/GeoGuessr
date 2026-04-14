@@ -17,7 +17,7 @@ body {
 
 .app-shell {
   min-height: 100vh;
-  padding: 24px 360px 24px 24px;
+  padding: 24px;
   position: relative;
 }
 
@@ -38,6 +38,17 @@ body {
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(22, 50, 79, 0.12);
   text-align: center;
+}
+
+.home-stack {
+  display: grid;
+  gap: 20px;
+  justify-items: center;
+}
+
+.home-stack .home-card,
+.home-stack .leaderboard-card {
+  margin-top: 0;
 }
 
 .home-card h1,
@@ -81,15 +92,11 @@ body {
 }
 
 .leaderboard-card {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  width: min(320px, calc(100vw - 48px));
+  width: min(640px, 100%);
   padding: 18px;
   background: rgba(255, 255, 255, 0.94);
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(22, 50, 79, 0.12);
-  z-index: 20;
 }
 
 .leaderboard-card h2 {
@@ -133,10 +140,7 @@ body {
 }
 
 .reset-leaderboard-button {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 20;
+  margin-top: 16px;
 }
 
 .top-bar {
@@ -296,7 +300,7 @@ body {
 
 @media (max-width: 900px) {
   .app-shell {
-    padding: 120px 16px 80px;
+    padding: 16px;
   }
 
   .top-bar {
@@ -313,18 +317,6 @@ body {
   .street-view-canvas,
   .map-canvas {
     min-height: 380px;
-  }
-
-  .leaderboard-card {
-    top: 16px;
-    right: 16px;
-    left: 16px;
-    width: auto;
-  }
-
-  .reset-leaderboard-button {
-    right: 16px;
-    bottom: 16px;
   }
 
   .modal-actions {

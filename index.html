@@ -14,20 +14,21 @@
 </head>
 <body>
   <main class="app-shell">
-    <aside class="leaderboard-card" aria-labelledby="leaderboard-title">
-      <h2 id="leaderboard-title">Top 5 Players</h2>
-      <div id="leaderboard-list" class="leaderboard-list"></div>
-    </aside>
-
-    <button id="reset-leaderboard-button" class="secondary-button reset-leaderboard-button" type="button">
-      Reset Leaderboard
-    </button>
-
     <section id="home-view" class="view view-active">
-      <div class="home-card">
-        <h1>Mini GeoGuessr UK</h1>
-        <p>Guess three UK Street View locations by clicking on the map and score points based on how close you get.</p>
-        <button id="start-game-button" class="primary-button">Start Game</button>
+      <div class="home-stack">
+        <div class="home-card">
+          <h1>Mini GeoGuessr UK</h1>
+          <p>Guess three UK Street View locations by clicking on the map and score points based on how close you get.</p>
+          <button id="start-game-button" class="primary-button">Start Game</button>
+        </div>
+
+        <aside class="leaderboard-card" aria-labelledby="leaderboard-title">
+          <h2 id="leaderboard-title">Top 5 Players</h2>
+          <div id="leaderboard-list" class="leaderboard-list"></div>
+          <button id="reset-leaderboard-button" class="secondary-button reset-leaderboard-button" type="button">
+            Reset Leaderboard
+          </button>
+        </aside>
       </div>
     </section>
 
