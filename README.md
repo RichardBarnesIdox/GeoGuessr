@@ -15,22 +15,25 @@ You only need:
 
 ## Run locally
 
-1. Open [config.js](/c:/Users/richard.barnes/OneDrive%20-%20Idox%20Software%20Ltd/Documents/RB/Python%20Learning/GeoGuessr/geoguessr/config.js) and replace:
+1. Copy `config.example.js` to `config.js`.
+2. Open [config.js](/c:/Users/richard.barnes/OneDrive%20-%20Idox%20Software%20Ltd/Documents/RB/Python%20Learning/GeoGuessr/geoguessr/config.js) and replace:
    - `YOUR_GOOGLE_MAPS_API_KEY` with your real Google Maps key
    - `YOUR-PROJECT-ID...` with your Firebase Realtime Database URL
-2. From this repository folder, start a local server:
+3. From this repository folder, start a local server:
 
 ```powershell
 python -m http.server 8000
 ```
 
-3. Open `http://localhost:8000` in your browser.
+4. Open `http://localhost:8000` in your browser.
 
 ## Google Maps API key
 
 - The app reads the key from [config.js](/c:/Users/richard.barnes/OneDrive%20-%20Idox%20Software%20Ltd/Documents/RB/Python%20Learning/GeoGuessr/geoguessr/config.js).
 - A sample file is included at [config.example.js](/c:/Users/richard.barnes/OneDrive%20-%20Idox%20Software%20Ltd/Documents/RB/Python%20Learning/GeoGuessr/geoguessr/config.example.js).
+- `config.js` is gitignored and should stay local only.
 - If the key is missing or invalid, the map game still loads, but Street View will show a simple fallback message.
+- Because this app runs entirely in the browser, a Google Maps JavaScript API key cannot be fully hidden from end users after deployment. Restrict it in Google Cloud by HTTP referrer and API scope so exposure does not become abuse.
 
 ## Shared leaderboard setup
 
