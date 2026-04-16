@@ -4,6 +4,25 @@
   const LEADERBOARD_RETRY_LIMIT = 3;
   const rounds = [
     {
+      name: "Angel of the North",
+      lat: 54.91447,
+      lng: -1.58862,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+    {
+      name: "Abbey Road Studios",
+      lat: 51.53218,
+      lng: -0.17744,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+    {
+      name: "Trafford Centre",
+      lat: 53.46559,
+      lng: -2.34256,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    }
+    /*
+    {
       name: "Idox Farnborough",
       lat: 51.2863,
       lng: -0.7601,
@@ -21,6 +40,7 @@
       lng: -4.25759,
       osGridRef: "Where is this?  Click on map to place your guess!"
     }
+    */
   ];
 
   const state = {

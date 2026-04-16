@@ -21,6 +21,16 @@ body {
   position: relative;
 }
 
+.app-logo {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: clamp(120px, 14vw, 180px);
+  height: auto;
+  display: block;
+  z-index: 10;
+}
+
 .view {
   display: none;
 }
@@ -294,6 +304,12 @@ body {
 @media (max-width: 900px) {
   .app-shell {
     padding: 16px;
+  }
+
+  .app-logo {
+    top: 16px;
+    left: 16px;
+    width: clamp(96px, 28vw, 140px);
   }
 
   .top-bar {
