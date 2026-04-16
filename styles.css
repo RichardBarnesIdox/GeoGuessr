@@ -32,16 +32,6 @@ body {
   background: var(--idox-light);
 }
 
-.app-logo {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  width: clamp(30px, 3.5vw, 45px);
-  height: auto;
-  display: block;
-  z-index: 10;
-}
-
 .view {
   display: none;
 }
@@ -73,11 +63,25 @@ body {
   margin-top: 0;
 }
 
+.home-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.title-logo {
+  width: 45px;
+  height: auto;
+  display: block;
+}
+
 .home-card h1,
 .end-card h2,
 .top-bar h2,
 .result-card h3 {
-  margin-top: 0;
+  margin: 0;
   color: var(--idox-dark);
 }
 
@@ -347,10 +351,13 @@ body {
     padding: 16px;
   }
 
-  .app-logo {
-    top: 16px;
-    left: 16px;
-    width: clamp(24px, 7vw, 36px);
+  .home-title {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .title-logo {
+    width: 36px;
   }
 
   .top-bar {
