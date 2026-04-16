@@ -65,16 +65,22 @@ body {
 
 .home-title {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 16px;
 }
 
 .title-logo {
-  width: 22px;
-  height: auto;
+  height: clamp(2.25rem, 4vw, 3rem);
+  width: auto;
   display: block;
+}
+
+.home-title-text {
+  font-size: clamp(2.25rem, 4vw, 3rem);
+  line-height: 1;
 }
 
 .home-card h1,
@@ -352,12 +358,8 @@ body {
   }
 
   .home-title {
-    gap: 10px;
+    gap: 8px;
     margin-bottom: 14px;
-  }
-
-  .title-logo {
-    width: 18px;
   }
 
   .top-bar {
