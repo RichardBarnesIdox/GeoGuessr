@@ -3,6 +3,7 @@
   const LEADERBOARD_PATH = "leaderboard";
   const LEADERBOARD_RETRY_LIMIT = 3;
   const rounds = [
+    /*
     {
       name: "Angel of the North",
       lat: 54.91447,
@@ -19,6 +20,37 @@
       name: "Trafford Centre",
       lat: 53.46559,
       lng: -2.34256,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+    */
+    {
+      name: "Magna Carta Memorial",
+      lat: 51.44469,
+      lng: -0.56558,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+    {
+      name: "Greyfriars Bobby, Edinburgh",
+      lat: 55.94688,
+      lng: -3.19126,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+    {
+      name: "Alton Towers",
+      lat: 52.98694,
+      lng: -1.88283,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+    {
+      name: "Magna Carta Memorial",
+      lat: 51.44469,
+      lng: -0.56558,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+    {
+      name: "Magna Carta Memorial",
+      lat: 51.44469,
+      lng: -0.56558,
       osGridRef: "Where is this?  Click on map to place your guess!"
     }
     /*
