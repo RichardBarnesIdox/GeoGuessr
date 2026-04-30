@@ -102,6 +102,9 @@
     guessMap: document.getElementById("guess-map"),
     leaderboardList: document.getElementById("leaderboard-list"),
     resetLeaderboardButton: document.getElementById("reset-leaderboard-button"),
+    resetLeaderboardConfirmModal: document.getElementById("reset-leaderboard-confirm-modal"),
+    resetLeaderboardConfirmNoButton: document.getElementById("reset-leaderboard-confirm-no"),
+    resetLeaderboardConfirmYesButton: document.getElementById("reset-leaderboard-confirm-yes"),
     leaderboardModal: document.getElementById("leaderboard-modal"),
     leaderboardForm: document.getElementById("leaderboard-form"),
     leaderboardName: document.getElementById("leaderboard-name"),
@@ -440,6 +443,15 @@
     elements.leaderboardModal.classList.add("hidden");
   }
 
+  function openResetLeaderboardConfirmModal() {
+    elements.resetLeaderboardConfirmModal.classList.remove("hidden");
+    elements.resetLeaderboardConfirmNoButton.focus();
+  }
+
+  function closeResetLeaderboardConfirmModal() {
+    elements.resetLeaderboardConfirmModal.classList.add("hidden");
+  }
+
   async function submitLeaderboardEntry(event) {
     event.preventDefault();
 
@@ -479,19 +491,25 @@
 
   async function resetLeaderboard() {
     if (!hasSharedLeaderboard()) {
+      closeResetLeaderboardConfirmModal();
       return;
     }
 
     elements.resetLeaderboardButton.disabled = true;
+    elements.resetLeaderboardConfirmNoButton.disabled = true;
+    elements.resetLeaderboardConfirmYesButton.disabled = true;
 
     try {
       await updateSharedLeaderboard(function () {
         return [];
       });
+      closeResetLeaderboardConfirmModal();
     } catch (error) {
       window.alert("Unable to reset the shared leaderboard right now.");
     } finally {
       elements.resetLeaderboardButton.disabled = false;
+      elements.resetLeaderboardConfirmNoButton.disabled = false;
+      elements.resetLeaderboardConfirmYesButton.disabled = false;
     }
   }
 
@@ -898,6 +916,14 @@
     });
 
     elements.resetLeaderboardButton.addEventListener("click", function () {
+      openResetLeaderboardConfirmModal();
+    });
+
+    elements.resetLeaderboardConfirmNoButton.addEventListener("click", function () {
+      closeResetLeaderboardConfirmModal();
+    });
+
+    elements.resetLeaderboardConfirmYesButton.addEventListener("click", function () {
       resetLeaderboard();
     });
 
