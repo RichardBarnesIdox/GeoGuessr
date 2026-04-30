@@ -25,8 +25,8 @@
     */
     {
       name: "Magna Carta Memorial",
-      lat: 51.44448,
-      lng: -0.56603,
+      lat: 51.44839,
+      lng: -0.56718,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
@@ -37,8 +37,8 @@
     },
     {
       name: "Alton Towers",
-      lat: 52.98685,
-      lng: -1.88335,
+      lat: 52.98680,
+      lng: -1.88325,
       osGridRef: "Where is this?  Click on map to place your guess!"
     }
     /*
