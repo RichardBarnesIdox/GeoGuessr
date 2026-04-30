@@ -48,9 +48,9 @@
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
-      name: "Derwent Dam",
-      lat: 53.40496,
-      lng: -1.74066,
+      name: "Derwent Reservoir",
+      lat: 53.40647,
+      lng: -1.73959,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
