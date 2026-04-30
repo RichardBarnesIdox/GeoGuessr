@@ -40,18 +40,6 @@
       lat: 52.98694,
       lng: -1.88283,
       osGridRef: "Where is this?  Click on map to place your guess!"
-    },
-    {
-      name: "Magna Carta Memorial",
-      lat: 51.44469,
-      lng: -0.56558,
-      osGridRef: "Where is this?  Click on map to place your guess!"
-    },
-    {
-      name: "Magna Carta Memorial",
-      lat: 51.44469,
-      lng: -0.56558,
-      osGridRef: "Where is this?  Click on map to place your guess!"
     }
     /*
     {
