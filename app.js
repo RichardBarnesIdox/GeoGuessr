@@ -22,7 +22,6 @@
       lng: -2.34256,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
-    */
     {
       name: "Magna Carta Memorial",
       lat: 51.44854,
@@ -40,7 +39,29 @@
       lat: 52.98680,
       lng: -1.88325,
       osGridRef: "Where is this?  Click on map to place your guess!"
-    }
+    },
+    */
+    { 
+      name: "Dungerness Power Stations",
+      lat: 50.91145,
+      lng: 0.96295,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+    {
+      name: "Derwent Dam",
+      lat: 53.40496,
+      lng: -1.74066
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+    {
+      name: "Whitelee Wind Farm",
+      lat: 55.71287,
+      lng: -4.34919,
+      osGridRef: "Where is this?  Click on map to place your guess!"
+    },
+
+
+
     /*
     {
       name: "Idox Farnborough",
