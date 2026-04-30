@@ -50,7 +50,7 @@
     {
       name: "Derwent Dam",
       lat: 53.40496,
-      lng: -1.74066
+      lng: -1.74066,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
