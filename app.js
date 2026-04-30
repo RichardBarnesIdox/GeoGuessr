@@ -25,8 +25,8 @@
     */
     {
       name: "Magna Carta Memorial",
-      lat: 51.44449,
-      lng: -0.56604,
+      lat: 51.44854,
+      lng: -0.56736,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
