@@ -137,7 +137,22 @@
       .filter(function (entry) {
         return entry &&
           typeof entry.name === "string" &&
-          typeof entry.company === "string" &&magna
+          typeof entry.company === "string" &&
+          Number.isFinite(entry.score);
+      })
+      .map(function (entry) {
+        return {
+          name: entry.name.trim() || "Anonymous",
+          company: entry.company.trim() || "Not provided",
+          score: Math.max(0, Math.round(entry.score)),
+          achievedAt: typeof entry.achievedAt === "number" ? entry.achievedAt : Date.now()
+        };
+      })
+      .sort(compareLeaderboardEntries)
+      .slice(0, LEADERBOARD_LIMIT);
+  }
+
+  function compareLeaderboardEntries(a, b) {
     if (b.score !== a.score) {
       return b.score - a.score;
     }
