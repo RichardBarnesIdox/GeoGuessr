@@ -22,6 +22,7 @@
       lng: -2.34256,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
+    */
     {
       name: "Magna Carta Memorial",
       lat: 51.44854,
@@ -40,7 +41,6 @@
       lng: -1.88325,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
-    */
     { 
       name: "Dungerness Power Stations",
       lat: 50.91145,
