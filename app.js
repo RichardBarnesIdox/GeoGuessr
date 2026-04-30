@@ -49,8 +49,8 @@
     },
     {
       name: "Derwent Reservoir",
-      lat: 53.40647,
-      lng: -1.73959,
+      lat: 53.40577,
+      lng: -1.73929,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
