@@ -58,7 +58,7 @@
       lat: 55.71287,
       lng: -4.34919,
       osGridRef: "Where is this?  Click on map to place your guess!"
-    },
+    }
 
 
 
