@@ -86,6 +86,7 @@
     endView: document.getElementById("end-view"),
     startGameButton: document.getElementById("start-game-button"),
     playAgainButton: document.getElementById("play-again-button"),
+    finishButton: document.getElementById("finish-button"),
     confirmGuessButton: document.getElementById("confirm-guess-button"),
     nextRoundButton: document.getElementById("next-round-button"),
     finalResultsButton: document.getElementById("final-results-button"),
@@ -794,6 +795,14 @@
     }
   }
 
+  function finishGame() {
+    logDiagnostic("Finish button routed back to home screen", {
+      viewState: getViewDiagnostics()
+    });
+    switchView("home");
+    loadLeaderboard();
+  }
+
   function nextRound() {
     if (state.currentRoundIndex >= rounds.length - 1) {
       showEndScreen();
@@ -883,7 +892,8 @@
   function attachEvents() {
     logDiagnostic("attachEvents called", {
       startGameButton: getElementDiagnostics(elements.startGameButton),
-      playAgainButton: getElementDiagnostics(elements.playAgainButton)
+      playAgainButton: getElementDiagnostics(elements.playAgainButton),
+      finishButton: getElementDiagnostics(elements.finishButton)
     });
 
     elements.startGameButton.addEventListener("click", function (event) {
@@ -901,6 +911,10 @@
         viewState: getViewDiagnostics()
       });
       resetGame();
+    });
+
+    elements.finishButton.addEventListener("click", function () {
+      finishGame();
     });
 
     elements.confirmGuessButton.addEventListener("click", function () {

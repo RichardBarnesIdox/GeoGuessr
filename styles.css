@@ -283,6 +283,13 @@ body {
   font-size: 1.2rem;
 }
 
+.end-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
