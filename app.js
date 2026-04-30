@@ -1,5 +1,5 @@
 (function () {
-  const LEADERBOARD_LIMIT = 5;
+  const LEADERBOARD_LIMIT = 10;
   const LEADERBOARD_PATH = "leaderboard";
   const LEADERBOARD_RETRY_LIMIT = 3;
   const rounds = [
@@ -75,6 +75,7 @@
     resultLine: null,
     panorama: null,
     pendingLeaderboardScore: null,
+    resettingLeaderboard: false,
     submittingLeaderboard: false
   };
 
@@ -100,7 +101,6 @@
     streetViewCanvas: document.getElementById("street-view"),
     streetViewFallback: document.getElementById("street-view-fallback"),
     leaderboardList: document.getElementById("leaderboard-list"),
-    resetLeaderboardButton: document.getElementById("reset-leaderboard-button"),
     leaderboardModal: document.getElementById("leaderboard-modal"),
     leaderboardForm: document.getElementById("leaderboard-form"),
     leaderboardName: document.getElementById("leaderboard-name"),
@@ -388,11 +388,11 @@
   }
 
   async function resetLeaderboard() {
-    if (!hasSharedLeaderboard()) {
+    if (!hasSharedLeaderboard() || state.resettingLeaderboard) {
       return;
     }
 
-    elements.resetLeaderboardButton.disabled = true;
+    state.resettingLeaderboard = true;
 
     try {
       await updateSharedLeaderboard(function () {
@@ -401,7 +401,14 @@
     } catch (error) {
       window.alert("Unable to reset the shared leaderboard right now.");
     } finally {
-      elements.resetLeaderboardButton.disabled = false;
+      state.resettingLeaderboard = false;
+    }
+  }
+
+  function handleKeyboardShortcut(event) {
+    if (event.ctrlKey && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "r") {
+      event.preventDefault();
+      resetLeaderboard();
     }
   }
 
@@ -719,10 +726,6 @@
       showEndScreen();
     });
 
-    elements.resetLeaderboardButton.addEventListener("click", function () {
-      resetLeaderboard();
-    });
-
     elements.leaderboardForm.addEventListener("submit", function (event) {
       submitLeaderboardEntry(event);
     });
@@ -730,6 +733,8 @@
     elements.leaderboardOptOutButton.addEventListener("click", function () {
       closeLeaderboardModal();
     });
+
+    document.addEventListener("keydown", handleKeyboardShortcut);
   }
 
   function init() {
