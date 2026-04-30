@@ -99,6 +99,7 @@
     breakdownList: document.getElementById("breakdown-list"),
     streetViewCanvas: document.getElementById("street-view"),
     streetViewFallback: document.getElementById("street-view-fallback"),
+    guessMap: document.getElementById("guess-map"),
     leaderboardList: document.getElementById("leaderboard-list"),
     resetLeaderboardButton: document.getElementById("reset-leaderboard-button"),
     leaderboardModal: document.getElementById("leaderboard-modal"),
@@ -108,6 +109,95 @@
     leaderboardFormMessage: document.getElementById("leaderboard-form-message"),
     leaderboardOptOutButton: document.getElementById("leaderboard-opt-out-button")
   };
+
+  const DIAGNOSTIC_PREFIX = "[Mini GeoGuessr diagnostics]";
+
+  function logDiagnostic(message, data) {
+    if (data === undefined) {
+      console.info(DIAGNOSTIC_PREFIX, message);
+      return;
+    }
+
+    console.info(DIAGNOSTIC_PREFIX, message, data);
+  }
+
+  function warnDiagnostic(message, data) {
+    console.warn(DIAGNOSTIC_PREFIX, message, data);
+  }
+
+  function getElementDiagnostics(element) {
+    if (!element) {
+      return { exists: false };
+    }
+
+    const rect = element.getBoundingClientRect();
+    const style = window.getComputedStyle(element);
+
+    return {
+      exists: true,
+      id: element.id,
+      className: element.className,
+      ariaHidden: element.getAttribute("aria-hidden"),
+      display: style.display,
+      visibility: style.visibility,
+      width: Math.round(rect.width),
+      height: Math.round(rect.height)
+    };
+  }
+
+  function getViewDiagnostics() {
+    return {
+      home: getElementDiagnostics(elements.homeView),
+      game: getElementDiagnostics(elements.gameView),
+      end: getElementDiagnostics(elements.endView)
+    };
+  }
+
+  function logMissingElementDiagnostics() {
+    const missingElements = Object.entries(elements)
+      .filter(function ([, element]) {
+        return !element;
+      })
+      .map(function ([name]) {
+        return name;
+      });
+
+    if (missingElements.length) {
+      warnDiagnostic("Missing expected DOM elements", missingElements);
+      return;
+    }
+
+    logDiagnostic("All expected DOM elements were found");
+  }
+
+  function attachGlobalDiagnostics() {
+    window.addEventListener("error", function (event) {
+      console.error(DIAGNOSTIC_PREFIX, "Window error", {
+        message: event.message,
+        filename: event.filename,
+        line: event.lineno,
+        column: event.colno,
+        error: event.error
+      });
+    });
+
+    window.addEventListener("unhandledrejection", function (event) {
+      console.error(DIAGNOSTIC_PREFIX, "Unhandled promise rejection", event.reason);
+    });
+  }
+
+  function runInitStep(name, step) {
+    logDiagnostic(`Init step started: ${name}`);
+
+    try {
+      const result = step();
+      logDiagnostic(`Init step completed: ${name}`);
+      return result;
+    } catch (error) {
+      console.error(DIAGNOSTIC_PREFIX, `Init step failed: ${name}`, error);
+      throw error;
+    }
+  }
 
   function getLeaderboardDatabaseUrl() {
     const config = window.APP_CONFIG || {};
@@ -412,10 +502,33 @@
       end: elements.endView
     };
 
+    logDiagnostic("switchView called", {
+      requestedView: viewName,
+      before: getViewDiagnostics()
+    });
+
+    if (!views[viewName]) {
+      warnDiagnostic("switchView received an unknown view name", {
+        requestedView: viewName,
+        availableViews: Object.keys(views)
+      });
+      return;
+    }
+
     Object.entries(views).forEach(([name, element]) => {
+      if (!element) {
+        warnDiagnostic("switchView skipped a missing view element", { name: name });
+        return;
+      }
+
       const isActive = name === viewName;
       element.classList.toggle("view-active", isActive);
       element.setAttribute("aria-hidden", String(!isActive));
+    });
+
+    logDiagnostic("switchView completed", {
+      requestedView: viewName,
+      after: getViewDiagnostics()
     });
   }
 
@@ -443,6 +556,11 @@
   }
 
   function initMap() {
+    logDiagnostic("initMap called", {
+      hasLeaflet: Boolean(window.L),
+      guessMap: getElementDiagnostics(elements.guessMap)
+    });
+
     state.map = L.map("guess-map", {
       center: [52.4862, -1.8904],
       zoom: 8,
@@ -463,6 +581,11 @@
       if (elements.roundResult.classList.contains("hidden")) {
         placeGuess(event.latlng);
       }
+    });
+
+    logDiagnostic("initMap completed", {
+      mapReady: Boolean(state.map),
+      guessMap: getElementDiagnostics(elements.guessMap)
     });
   }
 
@@ -507,6 +630,12 @@
   }
 
   function loadRound(roundIndex) {
+    logDiagnostic("loadRound called", {
+      roundIndex: roundIndex,
+      mapReady: Boolean(state.map),
+      viewState: getViewDiagnostics()
+    });
+
     clearRoundOverlays();
     resetMapView();
 
@@ -658,23 +787,44 @@
   }
 
   function resetGame() {
+    logDiagnostic("resetGame started", {
+      previousRoundIndex: state.currentRoundIndex,
+      previousTotalScore: state.totalScore,
+      previousResultsCount: state.results.length,
+      hasGoogleMapsLoadPromise: Boolean(googleMapsLoadPromise),
+      viewState: getViewDiagnostics()
+    });
+
     state.currentRoundIndex = 0;
     state.totalScore = 0;
     state.results = [];
     elements.runningScore.textContent = "0";
     switchView("game");
-    googleMapsLoadPromise.then(function () {
+
+    const mapsPromise = googleMapsLoadPromise || loadGoogleMapsScript();
+    mapsPromise.then(function () {
+      logDiagnostic("Google Maps load promise resolved for resetGame", {
+        hasGoogleMapsApi: Boolean(window.google && window.google.maps)
+      });
       loadRound(0);
+    }).catch(function (error) {
+      console.error(DIAGNOSTIC_PREFIX, "Google Maps load promise failed during resetGame", error);
     });
   }
 
   function loadGoogleMapsScript() {
     if (googleMapsLoadPromise) {
+      logDiagnostic("loadGoogleMapsScript reused existing promise");
       return googleMapsLoadPromise;
     }
 
+    logDiagnostic("loadGoogleMapsScript started", {
+      hasGoogleMapsApi: Boolean(window.google && window.google.maps)
+    });
+
     googleMapsLoadPromise = new Promise(function (resolve) {
       if (window.google && window.google.maps) {
+        logDiagnostic("Google Maps API already available");
         resolve();
         return;
       }
@@ -682,6 +832,9 @@
       const config = window.APP_CONFIG || {};
 
       if (!config.googleMapsApiKey || config.googleMapsApiKey === "YOUR_GOOGLE_MAPS_API_KEY") {
+        warnDiagnostic("Google Maps API key is missing or still set to the placeholder", {
+          googleMapsApiKey: config.googleMapsApiKey
+        });
         resolve();
         return;
       }
@@ -690,20 +843,45 @@
       script.src = `https://maps.googleapis.com/maps/api/js?key=${config.googleMapsApiKey}`;
       script.async = true;
       script.defer = true;
-      script.onload = resolve;
-      script.onerror = resolve;
+      script.onload = function () {
+        logDiagnostic("Google Maps API script loaded");
+        resolve();
+      };
+      script.onerror = function () {
+        warnDiagnostic("Google Maps API script failed to load", {
+          src: script.src
+        });
+        resolve();
+      };
       document.head.appendChild(script);
+      logDiagnostic("Google Maps API script tag appended", {
+        src: script.src
+      });
     });
 
     return googleMapsLoadPromise;
   }
 
   function attachEvents() {
-    elements.startGameButton.addEventListener("click", function () {
+    logDiagnostic("attachEvents called", {
+      startGameButton: getElementDiagnostics(elements.startGameButton),
+      playAgainButton: getElementDiagnostics(elements.playAgainButton)
+    });
+
+    elements.startGameButton.addEventListener("click", function (event) {
+      logDiagnostic("Start Game button clicked", {
+        defaultPrevented: event.defaultPrevented,
+        buttonDiagnostics: getElementDiagnostics(elements.startGameButton),
+        viewState: getViewDiagnostics()
+      });
       resetGame();
     });
 
-    elements.playAgainButton.addEventListener("click", function () {
+    elements.playAgainButton.addEventListener("click", function (event) {
+      logDiagnostic("Play Again button clicked", {
+        defaultPrevented: event.defaultPrevented,
+        viewState: getViewDiagnostics()
+      });
       resetGame();
     });
 
@@ -733,11 +911,25 @@
   }
 
   function init() {
-    renderLeaderboard();
-    loadLeaderboard();
-    initMap();
-    attachEvents();
-    loadGoogleMapsScript();
+    logDiagnostic("App init started", {
+      location: window.location.href,
+      initialViewState: getViewDiagnostics()
+    });
+
+    attachGlobalDiagnostics();
+    logMissingElementDiagnostics();
+
+    runInitStep("attachEvents", attachEvents);
+    runInitStep("renderLeaderboard", renderLeaderboard);
+    runInitStep("loadLeaderboard", loadLeaderboard);
+    runInitStep("initMap", initMap);
+    runInitStep("loadGoogleMapsScript", loadGoogleMapsScript);
+
+    logDiagnostic("App init completed", {
+      finalViewState: getViewDiagnostics(),
+      hasLeaflet: Boolean(window.L),
+      hasGoogleMapsApi: Boolean(window.google && window.google.maps)
+    });
   }
 
   init();
