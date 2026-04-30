@@ -75,7 +75,6 @@
     resultLine: null,
     panorama: null,
     pendingLeaderboardScore: null,
-    resettingLeaderboard: false,
     submittingLeaderboard: false
   };
 
@@ -101,6 +100,7 @@
     streetViewCanvas: document.getElementById("street-view"),
     streetViewFallback: document.getElementById("street-view-fallback"),
     leaderboardList: document.getElementById("leaderboard-list"),
+    resetLeaderboardButton: document.getElementById("reset-leaderboard-button"),
     leaderboardModal: document.getElementById("leaderboard-modal"),
     leaderboardForm: document.getElementById("leaderboard-form"),
     leaderboardName: document.getElementById("leaderboard-name"),
@@ -388,11 +388,11 @@
   }
 
   async function resetLeaderboard() {
-    if (!hasSharedLeaderboard() || state.resettingLeaderboard) {
+    if (!hasSharedLeaderboard()) {
       return;
     }
 
-    state.resettingLeaderboard = true;
+    elements.resetLeaderboardButton.disabled = true;
 
     try {
       await updateSharedLeaderboard(function () {
@@ -401,14 +401,7 @@
     } catch (error) {
       window.alert("Unable to reset the shared leaderboard right now.");
     } finally {
-      state.resettingLeaderboard = false;
-    }
-  }
-
-  function handleKeyboardShortcut(event) {
-    if (event.ctrlKey && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "r") {
-      event.preventDefault();
-      resetLeaderboard();
+      elements.resetLeaderboardButton.disabled = false;
     }
   }
 
@@ -726,6 +719,10 @@
       showEndScreen();
     });
 
+    elements.resetLeaderboardButton.addEventListener("click", function () {
+      resetLeaderboard();
+    });
+
     elements.leaderboardForm.addEventListener("submit", function (event) {
       submitLeaderboardEntry(event);
     });
@@ -733,8 +730,6 @@
     elements.leaderboardOptOutButton.addEventListener("click", function () {
       closeLeaderboardModal();
     });
-
-    document.addEventListener("keydown", handleKeyboardShortcut);
   }
 
   function init() {

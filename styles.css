@@ -175,6 +175,10 @@ body {
   margin: 0;
 }
 
+.reset-leaderboard-button {
+  margin-top: 16px;
+}
+
 .top-bar {
   display: flex;
   justify-content: space-between;
