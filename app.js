@@ -25,8 +25,8 @@
     */
     {
       name: "Magna Carta Memorial",
-      lat: 51.44839,
-      lng: -0.56718,
+      lat: 51.44448,
+      lng: -0.56603,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
     {
@@ -137,22 +137,7 @@
       .filter(function (entry) {
         return entry &&
           typeof entry.name === "string" &&
-          typeof entry.company === "string" &&
-          Number.isFinite(entry.score);
-      })
-      .map(function (entry) {
-        return {
-          name: entry.name.trim() || "Anonymous",
-          company: entry.company.trim() || "Not provided",
-          score: Math.max(0, Math.round(entry.score)),
-          achievedAt: typeof entry.achievedAt === "number" ? entry.achievedAt : Date.now()
-        };
-      })
-      .sort(compareLeaderboardEntries)
-      .slice(0, LEADERBOARD_LIMIT);
-  }
-
-  function compareLeaderboardEntries(a, b) {
+          typeof entry.company === "string" &&magna
     if (b.score !== a.score) {
       return b.score - a.score;
     }
