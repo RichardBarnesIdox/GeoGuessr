@@ -2,8 +2,8 @@
   const LEADERBOARD_LIMIT = 10;
   const LEADERBOARD_PATH = "leaderboard";
   const LEADERBOARD_RETRY_LIMIT = 3;
+  const ROUNDS_PER_GAME = 3;
   const rounds = [
-    /*
     {
       name: "Angel of the North",
       lat: 54.91447,
@@ -22,7 +22,6 @@
       lng: -2.34256,
       osGridRef: "Where is this?  Click on map to place your guess!"
     },
-    */
     {
       name: "Magna Carta Memorial",
       lat: 51.44854,
@@ -60,8 +59,6 @@
       osGridRef: "Where is this?  Click on map to place your guess!"
     }
 
-
-
     /*
     {
       name: "Idox Farnborough",
@@ -86,6 +83,7 @@
 
   const state = {
     currentRoundIndex: 0,
+    gameRounds: [],
     totalScore: 0,
     results: [],
     leaderboard: [],
@@ -595,6 +593,19 @@
     return Math.max(0, Math.round(5000 * Math.exp(-distanceKm / 200)));
   }
 
+  function getRandomGameRounds() {
+    const shuffledRounds = rounds.slice();
+
+    for (let index = shuffledRounds.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      const round = shuffledRounds[index];
+      shuffledRounds[index] = shuffledRounds[randomIndex];
+      shuffledRounds[randomIndex] = round;
+    }
+
+    return shuffledRounds.slice(0, Math.min(ROUNDS_PER_GAME, shuffledRounds.length));
+  }
+
   function initMap() {
     logDiagnostic("initMap called", {
       hasLeaflet: Boolean(window.L),
@@ -679,8 +690,8 @@
     clearRoundOverlays();
     resetMapView();
 
-    const round = rounds[roundIndex];
-    elements.roundTitle.textContent = `Round ${roundIndex + 1} of ${rounds.length}`;
+    const round = state.gameRounds[roundIndex];
+    elements.roundTitle.textContent = `Round ${roundIndex + 1} of ${state.gameRounds.length}`;
     elements.roundSubtitle.textContent = round.osGridRef
       ? round.osGridRef
       : "No grid reference provided";
@@ -750,7 +761,7 @@
       return;
     }
 
-    const round = rounds[state.currentRoundIndex];
+    const round = state.gameRounds[state.currentRoundIndex];
     const actualLatLng = { lat: round.lat, lng: round.lng };
     const distanceKm = haversineDistanceKm(state.guessLatLng, actualLatLng);
     const score = calculateScore(distanceKm);
@@ -790,7 +801,7 @@
     elements.roundResult.classList.remove("hidden");
     elements.confirmGuessButton.classList.add("hidden");
 
-    if (state.currentRoundIndex < rounds.length - 1) {
+    if (state.currentRoundIndex < state.gameRounds.length - 1) {
       elements.nextRoundButton.classList.remove("hidden");
     } else {
       elements.finalResultsButton.classList.remove("hidden");
@@ -825,7 +836,7 @@
   }
 
   function nextRound() {
-    if (state.currentRoundIndex >= rounds.length - 1) {
+    if (state.currentRoundIndex >= state.gameRounds.length - 1) {
       showEndScreen();
       return;
     }
@@ -844,6 +855,7 @@
     });
 
     state.currentRoundIndex = 0;
+    state.gameRounds = getRandomGameRounds();
     state.totalScore = 0;
     state.results = [];
     elements.runningScore.textContent = "0";
