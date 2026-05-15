@@ -585,8 +585,28 @@
     }
   }
 
-  function getLeaderboardExportJson(entries) {
-    return JSON.stringify(entries, null, 2);
+  function formatLeaderboardTableCell(value) {
+    return String(value ?? "").replace(/\r?\n/g, " ").trim();
+  }
+
+  function getLeaderboardExportTable(entries) {
+    const rows = [["score", "name", "company", "email", "deleted"]];
+
+    entries.forEach(function (entry) {
+      rows.push([
+        entry.score,
+        entry.name,
+        entry.company,
+        entry.email,
+        entry.deleted === true ? "true" : "false"
+      ]);
+    });
+
+    return rows
+      .map(function (row) {
+        return row.map(formatLeaderboardTableCell).join("\t");
+      })
+      .join("\n");
   }
 
   function writeTextToClipboard(text) {
@@ -627,7 +647,7 @@
       const leaderboardState = await fetchLeaderboardState();
       setLeaderboardEntries(leaderboardState.entries);
       renderLeaderboard();
-      await writeTextToClipboard(getLeaderboardExportJson(leaderboardState.entries));
+      await writeTextToClipboard(getLeaderboardExportTable(leaderboardState.entries));
       window.alert("Leaderboard entries copied to the clipboard.");
     } catch (error) {
       window.alert("Unable to copy persisted leaderboard entries right now.");
