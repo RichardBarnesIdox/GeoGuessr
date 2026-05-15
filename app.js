@@ -586,7 +586,13 @@
   }
 
   function formatLeaderboardTableCell(value) {
-    return String(value ?? "").replace(/\r?\n/g, " ").trim();
+    const text = String(value ?? "").replace(/\r?\n/g, " ").trim();
+
+    if (/[",]/.test(text)) {
+      return `"${text.replace(/"/g, '""')}"`;
+    }
+
+    return text;
   }
 
   function getLeaderboardExportTable(entries) {
@@ -604,7 +610,7 @@
 
     return rows
       .map(function (row) {
-        return row.map(formatLeaderboardTableCell).join("\t");
+        return row.map(formatLeaderboardTableCell).join(",");
       })
       .join("\n");
   }
