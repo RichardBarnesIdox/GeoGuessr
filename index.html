@@ -23,7 +23,7 @@
               alt="Idox logo"
               class="title-logo"
             >
-            <h1 class="home-title-text">Mini GeoGuessr UK</h1>
+            <h1 id="home-title-text" class="home-title-text">Mini GeoGuessr UK</h1>
           </div>
           <p>Guess three UK Street View locations by clicking on the map and score points based on how close you get.</p>
           <button id="start-game-button" class="primary-button">Start Game</button>
@@ -93,7 +93,7 @@
 
   <div id="leaderboard-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="leaderboard-modal-title">
     <div class="modal-card">
-      <h2 id="leaderboard-modal-title">Top 5 Score!</h2>
+      <h2 id="leaderboard-modal-title">Top 10 Score!</h2>
       <p>Your score made it onto the leaderboard. Add your details below, or opt out.</p>
       <form id="leaderboard-form" class="leaderboard-form">
         <label class="form-field" for="leaderboard-name">
@@ -103,6 +103,11 @@
         <label class="form-field" for="leaderboard-company">
           Company
           <input id="leaderboard-company" name="company" type="text" maxlength="50" required>
+        </label>
+        <label class="form-field" for="leaderboard-email">
+          Email address (optional)
+          <input id="leaderboard-email" name="email" type="email" maxlength="100">
+          <span class="field-hint">Only required if you want to be eligible for the prize.</span>
         </label>
         <p id="leaderboard-form-message" class="form-message hidden" aria-live="polite"></p>
         <div class="modal-actions">
@@ -116,7 +121,7 @@
   <div id="reset-leaderboard-confirm-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reset-leaderboard-confirm-title">
     <div class="modal-card">
       <h2 id="reset-leaderboard-confirm-title">Reset Leaderboard?</h2>
-      <p>Resetting the leader board is permanent - are you sure?</p>
+      <p>Resetting hides all current entries from the leaderboard while retaining the saved records.</p>
       <div class="modal-actions">
         <button id="reset-leaderboard-confirm-no" class="primary-button" type="button">No</button>
         <button id="reset-leaderboard-confirm-yes" class="secondary-button" type="button">Yes</button>

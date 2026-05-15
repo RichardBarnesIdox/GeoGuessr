@@ -86,6 +86,7 @@
     gameRounds: [],
     totalScore: 0,
     results: [],
+    leaderboardEntries: [],
     leaderboard: [],
     guessLatLng: null,
     map: null,
@@ -120,6 +121,7 @@
     streetViewCanvas: document.getElementById("street-view"),
     streetViewFallback: document.getElementById("street-view-fallback"),
     guessMap: document.getElementById("guess-map"),
+    homeTitleText: document.getElementById("home-title-text"),
     leaderboardList: document.getElementById("leaderboard-list"),
     resetLeaderboardButton: document.getElementById("reset-leaderboard-button"),
     resetLeaderboardConfirmModal: document.getElementById("reset-leaderboard-confirm-modal"),
@@ -129,6 +131,7 @@
     leaderboardForm: document.getElementById("leaderboard-form"),
     leaderboardName: document.getElementById("leaderboard-name"),
     leaderboardCompany: document.getElementById("leaderboard-company"),
+    leaderboardEmail: document.getElementById("leaderboard-email"),
     leaderboardFormMessage: document.getElementById("leaderboard-form-message"),
     leaderboardOptOutButton: document.getElementById("leaderboard-opt-out-button")
   };
@@ -241,12 +244,26 @@
     return `${getLeaderboardDatabaseUrl()}/${LEADERBOARD_PATH}.json`;
   }
 
+  function getLeaderboardEntryList(data) {
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    if (data && typeof data === "object") {
+      return Object.values(data);
+    }
+
+    return [];
+  }
+
   function sanitizeLeaderboardEntries(entries) {
-    if (!Array.isArray(entries)) {
+    const entryList = getLeaderboardEntryList(entries);
+
+    if (!entryList.length) {
       return [];
     }
 
-    return entries
+    return entryList
       .filter(function (entry) {
         return entry &&
           typeof entry.name === "string" &&
@@ -254,15 +271,35 @@
           Number.isFinite(entry.score);
       })
       .map(function (entry) {
+        const deletedAt = typeof entry.deletedAt === "number" ? entry.deletedAt : null;
+
         return {
           name: entry.name.trim() || "Anonymous",
           company: entry.company.trim() || "Not provided",
+          email: typeof entry.email === "string" ? entry.email.trim() : "",
           score: Math.max(0, Math.round(entry.score)),
-          achievedAt: typeof entry.achievedAt === "number" ? entry.achievedAt : Date.now()
+          achievedAt: typeof entry.achievedAt === "number" ? entry.achievedAt : Date.now(),
+          deleted: entry.deleted === true || deletedAt !== null,
+          deletedAt: deletedAt
         };
       })
+      .sort(compareLeaderboardEntries);
+  }
+
+  function isActiveLeaderboardEntry(entry) {
+    return entry.deleted !== true && !Number.isFinite(entry.deletedAt);
+  }
+
+  function getVisibleLeaderboardEntries(entries) {
+    return entries
+      .filter(isActiveLeaderboardEntry)
       .sort(compareLeaderboardEntries)
       .slice(0, LEADERBOARD_LIMIT);
+  }
+
+  function setLeaderboardEntries(entries) {
+    state.leaderboardEntries = sanitizeLeaderboardEntries(entries);
+    state.leaderboard = getVisibleLeaderboardEntries(state.leaderboardEntries);
   }
 
   function compareLeaderboardEntries(a, b) {
@@ -327,6 +364,7 @@
     state.submittingLeaderboard = isDisabled;
     elements.leaderboardName.disabled = isDisabled;
     elements.leaderboardCompany.disabled = isDisabled;
+    elements.leaderboardEmail.disabled = isDisabled;
     elements.leaderboardOptOutButton.disabled = isDisabled;
 
     const submitButton = elements.leaderboardForm.querySelector('button[type="submit"]');
@@ -359,7 +397,7 @@
     const etag = response.headers.get("ETag");
     return {
       etag: etag,
-      entries: sanitizeLeaderboardEntries(Array.isArray(data) ? data : [])
+      entries: sanitizeLeaderboardEntries(data)
     };
   }
 
@@ -395,16 +433,16 @@
 
   async function loadLeaderboard() {
     if (!hasSharedLeaderboard()) {
-      state.leaderboard = [];
+      setLeaderboardEntries([]);
       renderLeaderboard();
       return;
     }
 
     try {
       const leaderboardState = await fetchLeaderboardState();
-      state.leaderboard = leaderboardState.entries;
+      setLeaderboardEntries(leaderboardState.entries);
     } catch (error) {
-      state.leaderboard = [];
+      setLeaderboardEntries([]);
     }
 
     renderLeaderboard();
@@ -421,7 +459,7 @@
       const didSave = await putLeaderboardEntries(nextEntries, leaderboardState.etag);
 
       if (didSave) {
-        state.leaderboard = nextEntries;
+        setLeaderboardEntries(nextEntries);
         renderLeaderboard();
         return nextEntries;
       }
@@ -481,6 +519,7 @@
 
     const name = elements.leaderboardName.value.trim();
     const company = elements.leaderboardCompany.value.trim();
+    const email = elements.leaderboardEmail.value.trim();
 
     if (!name || !company) {
       return;
@@ -494,6 +533,7 @@
         return entries.concat([{
           name: name,
           company: company,
+          email: email,
           score: state.pendingLeaderboardScore,
           achievedAt: Date.now()
         }]);
@@ -520,8 +560,20 @@
     elements.resetLeaderboardConfirmYesButton.disabled = true;
 
     try {
-      await updateSharedLeaderboard(function () {
-        return [];
+      const resetAt = Date.now();
+
+      await updateSharedLeaderboard(function (entries) {
+        return entries.map(function (entry) {
+          if (!isActiveLeaderboardEntry(entry)) {
+            return entry;
+          }
+
+          return {
+            ...entry,
+            deleted: true,
+            deletedAt: resetAt
+          };
+        });
       });
       closeResetLeaderboardConfirmModal();
     } catch (error) {
@@ -530,6 +582,55 @@
       elements.resetLeaderboardButton.disabled = false;
       elements.resetLeaderboardConfirmNoButton.disabled = false;
       elements.resetLeaderboardConfirmYesButton.disabled = false;
+    }
+  }
+
+  function getLeaderboardExportJson(entries) {
+    return JSON.stringify(entries, null, 2);
+  }
+
+  function writeTextToClipboard(text) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      return navigator.clipboard.writeText(text);
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.top = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+      const didCopy = document.execCommand("copy");
+
+      if (!didCopy) {
+        throw new Error("Clipboard copy failed.");
+      }
+
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  }
+
+  async function copyPersistedLeaderboardEntries() {
+    if (!hasSharedLeaderboard()) {
+      window.alert("Shared leaderboard is not configured.");
+      return;
+    }
+
+    try {
+      const leaderboardState = await fetchLeaderboardState();
+      setLeaderboardEntries(leaderboardState.entries);
+      renderLeaderboard();
+      await writeTextToClipboard(getLeaderboardExportJson(leaderboardState.entries));
+      window.alert("Leaderboard entries copied to the clipboard.");
+    } catch (error) {
+      window.alert("Unable to copy persisted leaderboard entries right now.");
     }
   }
 
@@ -980,6 +1081,10 @@
 
     elements.leaderboardOptOutButton.addEventListener("click", function () {
       closeLeaderboardModal();
+    });
+
+    elements.homeTitleText.addEventListener("click", function () {
+      copyPersistedLeaderboardEntries();
     });
   }
 
